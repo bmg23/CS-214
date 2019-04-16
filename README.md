@@ -1,5 +1,7 @@
 # CS-214
 Calvin College Computer Science 214 - Programming Language Concepts
+  
+  
   Welcome to my GitHub repository for class projects!
   
   The goal of this course was to learn more about the different ways to program. 
