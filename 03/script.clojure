@@ -1,0 +1,74 @@
+Script started on Wed 20 Feb 2019 11:33:11 AM EST
+bmg23@gold29:~/214/projects/03$ cd clojure/src
+bmg23@gold29:~/214/projects/03/clojure/src$ cat clok[K[K[K[Kswitch.clj
+;;switch.clj
+;; Author: Brian Goins (bmg23)
+;; Date: 2/16/2019
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(ns switch)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Function letterGrade
+;;Input: average grade, Integer
+;;Output: letter grade, string
+;;Uses case statement to return letter grade.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn letterGrade [average]
+    (cond
+        (= (int (/ average 10)) 10)           "A"
+        (= (int (/ average 10)) 9)             "A"
+        (= (int (/ average 10)) 8)             "B"
+        (= (int (/ average 10)) 7)             "C"
+        (= (int (/ average 10)) 6)             "D"
+        :else                                  "F"      
+    )
+)
+
+(defn -main []
+    (print "\nEnter the average grade: ")
+    (flush)
+    (let
+        [ avgGrade (read) ]
+
+        (print "\nLetter Grade: ")
+        (print (letterGrade avgGrade))
+        (print "\n") (flush)
+    
+    )
+)bmg23@gold29:~/214/projects/03/clojure/src$ cd ..
+bmg23@gold29:~/214/projects/03/clojure$ clojure -m switch.cl[K[K[K
+
+Enter the average grade: 100
+
+Letter Grade: A
+bmg23@gold29:~/214/projects/03/clojure$ clojure -m switch
+
+Enter the average grade: 95
+
+Letter Grade: A
+bmg23@gold29:~/214/projects/03/clojure$ clojure -m switch
+
+Enter the average grade: 85
+
+Letter Grade: B
+bmg23@gold29:~/214/projects/03/clojure$ clojure -m switch
+
+Enter the average grade: 75
+
+Letter Grade: C
+bmg23@gold29:~/214/projects/03/clojure$ clojure -m switch
+
+Enter the average grade: 65
+
+Letter Grade: D
+bmg23@gold29:~/214/projects/03/clojure$ clojure -m switch
+
+Enter the average grade: 55
+
+Letter Grade: F
+bmg23@gold29:~/214/projects/03/clojure$ exit
+
+Script done on Wed 20 Feb 2019 11:34:02 AM EST

@@ -1,0 +1,484 @@
+Script started on Sat 13 Apr 2019 07:18:35 PM EDT
+bmg23@maroon30:~/214/projects/08$ cd clojure/src
+bmg23@maroon30:~/214/projects/08/clojure/src$ dir
+Temperature.clj  tempTester.clj
+bmg23@maroon30:~/214/projects/08/clojure/src$ cat *
+;; Temperature.clj, this class stores a 
+;; Degrees and Scale of a Temperature. 
+;;  
+;; Temp class: 
+;;      - Stores degrees and scale
+;;      - Accessors 
+;;      - Conversion Functions
+;;      - Relation Operations 
+;; 
+;; 
+;; Author: Brian Goins (bmg23)
+;; Date: 4/4/2019 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+;;Create a record for Temperature. 
+(defrecord Temperature [degrees scale])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Check Temp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn checkTemp [degrees scale] 
+    (if (and (= scale "F") (<= degrees -459.67))
+        ;;True Part
+        true    
+        
+        ;;False Part
+        (if (and (= scale "C") (<= degrees -273.15))
+            ;;True Part
+            true    
+
+            ;;False Part
+            (if (and (= scale "F") (<= degrees -459.67))
+                ;;True Part
+                true    
+
+                ;;False Part
+                false
+            )
+
+        )    
+    )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; make-Temperature constructs a Temperature object from a float and character
+;; Receive: degrees (double), scale (character)
+;; Return: the Temperature (degrees, scale)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn make-Temperature [degrees scale]
+    (if (checkTemp degrees scale)
+        (->Temperature degrees scale)
+        false
+    )
+)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                  GETTERS                                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn getDegrees [^Temperature aTemp]
+  (:degrees aTemp)
+)
+
+(defn getScale [^Temperature aTemp]
+  (:scale aTemp)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                   SETTERS                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn setDegrees [aTemp newDegrees]
+    (if (checkTemp newDegrees (:scale aTemp))
+        
+        ;;True Part
+        (->Temperature newDegrees (:scale aTemp))
+
+        ;;False Part
+        aTemp
+    )
+
+)
+
+(defn setScale [aTemp newScale]
+    (if (checkTemp (:degrees aTemp) newScale)
+        
+        ;;True Part
+        (->Temperature (:degrees aTemp) newScale)
+
+        ;;False Part
+        aTemp
+    )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                  CONVERTERS                                ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; All converters                                                             ;;
+;; Receives: temperature object.                                              ;;
+;; Returns: temperature object converted                                      ;;
+;; to a different scale.                                                      ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+
+;;To Fahrenheit
+(defn toF [aTemp]
+    (if (= "C" (getScale aTemp))
+        ;;True Part
+        (->Temperature (+ (* (:degrees aTemp) 1.8) 32) "F")
+
+        ;;False Part
+        (if (= (getScale aTemp) "K")
+                ;;True Part
+                (->Temperature (* (- (:degrees aTemp) 273.15) 1.8) "F")
+
+                ;;False Part
+                aTemp
+        )
+    )
+)
+
+;;To Celsius
+(defn toC [aTemp]
+    (if (= (getScale aTemp) "F")
+        ;;True Part
+        (->Temperature (/ (* ( - (:degrees aTemp) 32) 5) 9) "C")
+        
+        ;;False Part
+        (if (= (getScale aTemp) "K")
+            ;;True Part
+            (->Temperature (- (:degrees aTemp) 273.15) "C")
+        
+            ;;False Part
+            aTemp    
+        )
+    )
+)
+
+;;To Kelvin
+(defn toK [aTemp]
+    (if (= (:scale aTemp) "F")
+        ;;True Part
+        (->Temperature (+ (/ (* (- (:degrees aTemp) 32) 5) 9) 273.15) "K")
+
+        ;;False Part
+        (if (= (:scale aTemp) "C")
+            ;;True Part
+            (->Temperature (+ (:degrees aTemp) 273.15) "K")
+
+            ;;False Part
+            aTemp   
+        )
+    )
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                               I/O OPERATIONS                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn readTemp[]
+    (println "\nEnter degrees and scale, hit enter after each input: ")
+    (flush)
+    (->Temperature (read-string (read-line)) (read-line))
+    
+)
+
+(defn readStepValue []
+    (println "\nEnter a stepValue: ") (flush)
+    (read-string (read-line))
+
+)
+
+(defn printTemp[^Temperature aTemp]
+    (print (getDegrees aTemp))
+    (print " ")
+    (print (getScale aTemp))
+    (flush)
+
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            ADJUSTMENT OPERATIONS                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn raise [aTemp stepValue]
+    (->Temperature (+ (getDegrees aTemp) stepValue) (getScale aTemp))
+)
+
+
+(defn lower [^Temperature aTemp stepValue]
+    (if (checkTemp (- (getDegrees aTemp) stepValue) (getScale aTemp))
+        ;;True Part
+        (->Temperature (- (getDegrees aTemp) stepValue) (getScale aTemp))
+
+        ;;False Part
+        false   
+    )
+
+
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            RELATIONAL OPERATIONS                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn equals [t1 t2]
+    (let [ temp1 (toF t1)
+           temp2 (toF t2)
+         ]
+
+         (if (= (getDegrees temp1) (getDegrees temp2))
+            ;;True Part
+            true
+
+            ;;False Part
+            false          
+         )
+    )
+)
+
+(defn lessThen [lS rS]
+    (let [ leftSide (toF lS)
+           rightSide (toF rS)
+         ]
+
+         (if (= (getDegrees leftSide) (getDegrees rightSide))
+            ;;True Part
+            false
+
+            ;;False Part
+            (if (< (getDegrees leftSide) (getDegrees rightSide))
+                ;;True Part
+                true
+
+                ;;Fales Part
+                false
+            )          
+         )
+    )
+)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            CONSOLE FUNCTIONS                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn tableHeader []
+    (print "\n\n\n\n-----------------------------Temperature Table----------------------------------")
+    (print  (str "\n" "Fahrenheit\t" "\tCelsius\t\t" "\tKelvin" "\n")) 
+    (flush)
+
+
+
+)
+
+
+(defn table [baseTemp limitTemp stepValue]
+    
+    
+        ;;Fahrenheit 
+        (printTemp (toF baseTemp))
+        (print "\t\t\t")
+
+        ;;Celsius
+        (printTemp (toC baseTemp))
+        (print "\t\t\t\t")
+
+        ;;Kelvin
+        (printTemp (toK baseTemp))
+        (print "\n")
+    
+
+
+    (let [newTemp (raise baseTemp stepValue)] 
+        (if (lessThen newTemp limitTemp)
+            ;;True Part
+            (table newTemp limitTemp stepValue)
+
+            ;;False Part
+            (print "\n")
+        )
+    )
+)
+;; TempTester.clj, Driver sed to test and run Temperature class.  
+;; This program takes three values, and uses Temperature class
+;; to create a table of values.  
+;; Tests:
+;;      - Input:  
+;;          - baseTemp
+;;          - limitTemp
+;;          - stepValue
+;;      -Output: 
+;;          - Formatted table
+;; 
+;; Author: Brian Goins (bmg23)
+;; Date: 4/5/2019
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 
+(ns tempTester) ;program name
+(load "Temperature")
+
+
+(defn -main[]
+   
+   (let [
+            baseTemp (readTemp)
+            stepValue (readStepValue)
+            limitTemp (readTemp)
+            newTemp (toF baseTemp)
+         ]     
+        
+      (tableHeader)
+            
+      (table baseTemp limitTemp stepValue)
+      (print "\n")
+   )
+
+   (let [
+            baseTemp (readTemp)
+            stepValue (readStepValue)
+            limitTemp (readTemp)
+            newTemp (toF baseTemp)
+         ]     
+        
+      (tableHeader)
+            
+      (table baseTemp limitTemp stepValue)
+      (print "\n")
+   )
+
+)
+bmg23@maroon30:~/214/projects/08/clojure/src$ cd ..
+bmg23@maroon30:~/214/projects/08/clojure$ clojure -m tempTester
+
+Enter degrees and scale, hit enter after each input: 
+0
+F
+
+Enter a stepValue: 
+2.5
+
+Enter degrees and scale, hit enter after each input: 
+100
+C
+
+
+
+
+-----------------------------Temperature Table----------------------------------
+Fahrenheit		Celsius			Kelvin
+0 F			-160/9 C				255.3722222222222 K
+2.5 F			-16.38888888888889 C				256.76111111111106 K
+5.0 F			-15.0 C				258.15 K
+7.5 F			-13.61111111111111 C				259.5388888888889 K
+10.0 F			-12.222222222222221 C				260.92777777777775 K
+12.5 F			-10.833333333333334 C				262.31666666666666 K
+15.0 F			-9.444444444444445 C				263.7055555555555 K
+17.5 F			-8.055555555555555 C				265.09444444444443 K
+20.0 F			-6.666666666666667 C				266.4833333333333 K
+22.5 F			-5.277777777777778 C				267.8722222222222 K
+25.0 F			-3.888888888888889 C				269.26111111111106 K
+27.5 F			-2.5 C				270.65 K
+30.0 F			-1.1111111111111112 C				272.0388888888889 K
+32.5 F			0.2777777777777778 C				273.42777777777775 K
+35.0 F			1.6666666666666667 C				274.81666666666666 K
+37.5 F			3.0555555555555554 C				276.2055555555555 K
+40.0 F			4.444444444444445 C				277.59444444444443 K
+42.5 F			5.833333333333333 C				278.9833333333333 K
+45.0 F			7.222222222222222 C				280.3722222222222 K
+47.5 F			8.61111111111111 C				281.76111111111106 K
+50.0 F			10.0 C				283.15 K
+52.5 F			11.38888888888889 C				284.5388888888889 K
+55.0 F			12.777777777777779 C				285.92777777777775 K
+57.5 F			14.166666666666666 C				287.31666666666666 K
+60.0 F			15.555555555555555 C				288.7055555555555 K
+62.5 F			16.944444444444443 C				290.09444444444443 K
+65.0 F			18.333333333333332 C				291.4833333333333 K
+67.5 F			19.72222222222222 C				292.8722222222222 K
+70.0 F			21.11111111111111 C				294.26111111111106 K
+72.5 F			22.5 C				295.65 K
+75.0 F			23.88888888888889 C				297.0388888888889 K
+77.5 F			25.27777777777778 C				298.42777777777775 K
+80.0 F			26.666666666666668 C				299.81666666666666 K
+82.5 F			28.055555555555557 C				301.2055555555555 K
+85.0 F			29.444444444444443 C				302.59444444444443 K
+87.5 F			30.833333333333332 C				303.9833333333333 K
+90.0 F			32.22222222222222 C				305.3722222222222 K
+92.5 F			33.611111111111114 C				306.76111111111106 K
+95.0 F			35.0 C				308.15 K
+97.5 F			36.388888888888886 C				309.5388888888889 K
+100.0 F			37.77777777777778 C				310.92777777777775 K
+102.5 F			39.166666666666664 C				312.31666666666666 K
+105.0 F			40.55555555555556 C				313.7055555555555 K
+107.5 F			41.94444444444444 C				315.09444444444443 K
+110.0 F			43.333333333333336 C				316.4833333333333 K
+112.5 F			44.72222222222222 C				317.8722222222222 K
+115.0 F			46.111111111111114 C				319.26111111111106 K
+117.5 F			47.5 C				320.65 K
+120.0 F			48.888888888888886 C				322.0388888888889 K
+122.5 F			50.27777777777778 C				323.42777777777775 K
+125.0 F			51.666666666666664 C				324.81666666666666 K
+127.5 F			53.05555555555556 C				326.2055555555555 K
+130.0 F			54.44444444444444 C				327.59444444444443 K
+132.5 F			55.833333333333336 C				328.9833333333333 K
+135.0 F			57.22222222222222 C				330.3722222222222 K
+137.5 F			58.611111111111114 C				331.76111111111106 K
+140.0 F			60.0 C				333.15 K
+142.5 F			61.388888888888886 C				334.5388888888889 K
+145.0 F			62.77777777777778 C				335.92777777777775 K
+147.5 F			64.16666666666667 C				337.31666666666666 K
+150.0 F			65.55555555555556 C				338.7055555555555 K
+152.5 F			66.94444444444444 C				340.09444444444443 K
+155.0 F			68.33333333333333 C				341.4833333333333 K
+157.5 F			69.72222222222223 C				342.8722222222222 K
+160.0 F			71.11111111111111 C				344.26111111111106 K
+162.5 F			72.5 C				345.65 K
+165.0 F			73.88888888888889 C				347.0388888888889 K
+167.5 F			75.27777777777777 C				348.42777777777775 K
+170.0 F			76.66666666666667 C				349.81666666666666 K
+172.5 F			78.05555555555556 C				351.2055555555555 K
+175.0 F			79.44444444444444 C				352.59444444444443 K
+177.5 F			80.83333333333333 C				353.9833333333333 K
+180.0 F			82.22222222222223 C				355.3722222222222 K
+182.5 F			83.61111111111111 C				356.76111111111106 K
+185.0 F			85.0 C				358.15 K
+187.5 F			86.38888888888889 C				359.5388888888889 K
+190.0 F			87.77777777777777 C				360.92777777777775 K
+192.5 F			89.16666666666667 C				362.31666666666666 K
+195.0 F			90.55555555555556 C				363.7055555555555 K
+197.5 F			91.94444444444444 C				365.09444444444443 K
+200.0 F			93.33333333333333 C				366.4833333333333 K
+202.5 F			94.72222222222223 C				367.8722222222222 K
+205.0 F			96.11111111111111 C				369.26111111111106 K
+207.5 F			97.5 C				370.65 K
+210.0 F			98.88888888888889 C				372.0388888888889 K
+
+
+
+Enter degrees and scale, hit enter after each input: 
+0
+K
+
+Enter a stepValue: 
+20.0
+
+Enter degrees and scale, hit enter after each input: 
+100   212
+F
+
+
+
+
+-----------------------------Temperature Table----------------------------------
+Fahrenheit		Celsius			Kelvin
+-491.66999999999996 F			-273.15 C				0 K
+-455.66999999999996 F			-253.14999999999998 C				20.0 K
+-419.66999999999996 F			-233.14999999999998 C				40.0 K
+-383.66999999999996 F			-213.14999999999998 C				60.0 K
+-347.66999999999996 F			-193.14999999999998 C				80.0 K
+-311.66999999999996 F			-173.14999999999998 C				100.0 K
+-275.66999999999996 F			-153.14999999999998 C				120.0 K
+-239.66999999999996 F			-133.14999999999998 C				140.0 K
+-203.66999999999996 F			-113.14999999999998 C				160.0 K
+-167.66999999999996 F			-93.14999999999998 C				180.0 K
+-131.66999999999996 F			-73.14999999999998 C				200.0 K
+-95.66999999999996 F			-53.14999999999998 C				220.0 K
+-59.66999999999996 F			-33.14999999999998 C				240.0 K
+-23.66999999999996 F			-13.149999999999977 C				260.0 K
+12.330000000000041 F			6.850000000000023 C				280.0 K
+48.33000000000004 F			26.850000000000023 C				300.0 K
+84.33000000000004 F			46.85000000000002 C				320.0 K
+120.33000000000004 F			66.85000000000002 C				340.0 K
+156.33000000000004 F			86.85000000000002 C				360.0 K
+192.33000000000004 F			106.85000000000002 C				380.0 K
+
+
+bmg23@maroon30:~/214/projects/08/clojure$ exit
+
+Script done on Sat 13 Apr 2019 07:19:40 PM EDT

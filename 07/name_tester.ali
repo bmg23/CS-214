@@ -1,0 +1,94 @@
+V "GNAT Lib v5"
+M P W=b
+A -gnata
+P SS ZX
+
+RN
+RV NO_IO
+RV NO_SECONDARY_STACK
+RV SPARK_05
+
+U name_tester%b		name_tester.adb		f0b5f8a3 NE OO SU IL
+W ada%s			ada.ads			ada.ali
+W ada.tags%s		a-tags.adb		a-tags.ali
+W ada.text_io%s		a-textio.adb		a-textio.ali
+W system.assertions%s	s-assert.adb		s-assert.ali
+W system.concat_5%s	s-conca5.adb		s-conca5.ali
+W system.concat_6%s	s-conca6.adb		s-conca6.ali
+W system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+
+D ada.ads		20070406091342 3ffc8e18 ada%s
+D a-except.ads		20140730140058 5250cb69 ada.exceptions%s
+D a-ioexce.ads		20140225151544 e4a01f64 ada.io_exceptions%s
+D a-stream.ads		20141120112812 119b8fb3 ada.streams%s
+D a-tags.ads		20140730140058 dc4d0634 ada.tags%s
+D a-textio.ads		20140717063745 386df5d4 ada.text_io%s
+D a-unccon.ads		20070406091342 f9eb8f06 ada.unchecked_conversion%s
+D interfac.ads		20141120112812 6033a23f interfaces%s
+D i-cstrea.ads		20140801100435 e53d8b8e interfaces.c_streams%s
+D name_tester.adb	20190402004851 c8d80d77 name_tester%b
+D system.ads		20141031112219 1d274481 system%s
+D s-assert.ads		20140225151544 cd8d2c94 system.assertions%s
+D s-conca5.ads		20140225151544 875e432e system.concat_5%s
+D s-conca6.ads		20140225151544 d2c72db2 system.concat_6%s
+D s-crtl.ads		20141120112812 0ebbdb71 system.crtl%s
+D s-exctab.ads		20140225151139 54135002 system.exception_table%s
+D s-ficobl.ads		20140718105747 078245e4 system.file_control_block%s
+D s-parame.ads		20140801093848 7e2a0d7f system.parameters%s
+D s-secsta.ads		20140225151139 86a2856d system.secondary_stack%s
+D s-soflin.ads		20140801100131 aa763b52 system.soft_links%s
+D s-stache.ads		20140225151139 a37c21ec system.stack_checking%s
+D s-stalib.ads		20150220094550 fa0a3617 system.standard_library%s
+D s-stoele.ads		20140225151139 2dc34a04 system.storage_elements%s
+D s-traent.ads		20140730135025 005bf670 system.traceback_entries%s
+D s-unstyp.ads		20140731130224 9d58a4c0 system.unsigned_types%s
+D s-wchcon.ads		20140718092328 1b7d22d2 system.wch_con%s
+X 1 ada.ads
+16K9*Ada 19e8 10|7r6 7r23
+X 6 a-textio.ads
+49K13*Text_IO 471e16 10|7w10 7r27
+166U14*New_Line 10|134s5 137s5 141s5 145s5 177s38 178s21 196s16 197s30
+240U14*Get 10|139s5 143s5 147s5
+242U14*Put 10|106s5 135s5 138s5 142s5 146s5 177s3 178s3 197s4
+X 10 name_tester.adb
+9U11*name_tester 9b11 199l5 199t16
+10i3 NAME_SIZE{integer} 15r27 16r28 17r26 129r23 130r24 131r22
+14R8 Name 18e13 21r11 34r33 50r34 55r35 60r33 69r51 74r53 79r49 92r37 104r30
+. 116r30 128r32
+15a7 MyFirst{string} 36m15 52r20 71m13 94r20 119r45 149m13
+16a7 MyMiddle{string} 37m15 57r20 76m13 94r44 119r69 119r86 150m13
+17a7 MyLast{string} 38m15 62r20 81m13 94r69 119r21 151m13
+21r3 aName{14R8} 158m8 163m24 164m25 165m23 167r27 168r28 169r26 172r23 175m8
+. 177r30 178r12 184m24 185m25 186m23 190r27 191r28 192r26 193r30 196r8
+34U13 Init 34b13 34<19 34>39 34>46 34>54 39l7 39t11 158s3
+34r19 TheName{14R8} 36m7 37m7 38m7
+34a39 First{string} 36r26
+34a46 Middle{string} 37r27
+34a54 Last{string} 38r25
+50V12 getFirst{string} 50b12 50>21 53l7 53t15 167s18 190s18
+50r21 TheName{14R8} 52r12
+55V12 getMiddle{string} 55b12 55>22 58l7 58t16 168s18 191s18
+55r22 TheName{14R8} 57r12
+60V12 getLast{string} 60b12 60>20 63l7 63t14 169s18 192s18
+60r20 TheName{14R8} 62r12
+69U13 setFirst 69b13 69>22 69<38 72l7 72t15 163s3 184s3
+69a22 first{string} 71r24
+69r38 TheName{14R8} 71m5
+74U13 setMiddle 74b13 74>23 74<40 77l7 77t16 164s3 185s3
+74a23 middle{string} 76r25
+74r40 TheName{14R8} 76m5
+79U13 setLast 79b13 79>21 79<36 82l7 82t14 165s3 186s3
+79a21 last{string} 81r23
+79r36 TheName{14R8} 81m5
+92V12 getFullName{string} 92b12 92>24 95l7 95t18 106s9 193s18
+92r24 TheName{14R8} 94r12 94r36 94r61
+104U13 Put 104b13 104>17 107l7 107t10 177s26 196s4
+104r17 TheName{14R8} 106r21
+116V12 lfmi{string} 116b12 116>17 121l7 121t11 172s18 178s7
+116r17 TheName{14R8} 119r13 119r37 119r61 119r78
+128U13 read 128b13 128<18 153l7 153t11 175s3
+128r18 TheName{14R8} 149m5 150m5 151m5
+129a5 first{string} 139m9 149r24
+130a5 middle{string} 143m9 150r25
+131a5 last{string} 147m9 151r23
+

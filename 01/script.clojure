@@ -1,0 +1,62 @@
+Script started on Tue 05 Feb 2019 08:42:22 PM EST
+bmg23@gold34:~/214/projects/01/clojure$ l
+bash: l: command not found
+bmg23@gold34:~/214/projects/01/clojure$ s ls
+script.ada  script.clojure  src
+bmg23@gold34:~/214/projects/01/clojure$ cd src
+bmg23@gold34:~/214/projects/01/clojure/src$ ls
+rectangle_area.clj
+bmg23@gold34:~/214/projects/01/clojure/src$ cd re    at rectangle_area.clj
+;;;;rectangle_area.clj calculates the area of a rectangle.
+;;;;
+;;;;Input: Length and width of a rectangle.
+;;;;Output: The area of a rectangle. 
+;;;;
+;;;;Author: Brian Goins (bmg23)
+;;;;Date: 02/05/2019
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(ns rectangle_area) ; namespace function names the program 
+
+(defn rectArea [itsLength, itsWidth] 
+    (* itsLength itsWidth) ; return l*w
+)
+
+(defn -main [] 
+   
+    (def length)
+    (def width)
+    (println "\nTo compute the area of a rectangle,")
+    (print " enter its length: ") (flush) 
+    
+
+    (let [length (read)] 
+            
+        (print "\n enter its width: " ) (flush)
+
+        (let [width (read)]
+
+        (print "\nThe area is ")
+        (print (rectArea length width))
+        (print "\n\n")
+
+        )
+    )
+
+    
+    
+)
+
+bmg23@gold34:~/214/projects/01/clojure/src$ cd ..
+bmg23@gold34:~/214/projects/01/clojure$ cd ..at rectangle_area.cljls[Kcd src[4Pls[Ksjava RectangleArea[4@cat RectangleArea.java[2@javac RectangleArea.java[5Pruby circle_area.rb                   clojure -m rectangle  _area
+
+To compute the area of a rectangle,
+ enter its length: 15
+
+ enter its width: 25
+
+The area is 375
+
+bmg23@gold34:~/214/projects/01/clojure$ exit
+
+Script done on Tue 05 Feb 2019 08:43:39 PM EST

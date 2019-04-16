@@ -1,0 +1,401 @@
+Script started on Tue 05 Mar 2019 08:36:16 PM EST
+bmg23@gold10:~/214/projects/05$ cat *.adb
+-- Quadratics.adb
+-- Program: uses a subprogram to compute the roots of 
+-- a quadratic equation.
+-- Author: Brian Goins (bmg23)
+-- Date: 03/04/2019
+-----------------------------------------------------
+
+
+with Ada.Text_IO, Ada.Float_Text_IO, Ada.Integer_Text_IO, Ada.Numerics.Elementary_Functions;
+use Ada.Text_IO, Ada.Float_Text_IO, Ada.Integer_Text_IO, Ada.Numerics.Elementary_Functions;
+
+
+procedure quadratic is 
+    a, b, c, root1, root2 : Float;
+
+    function quadraticRoots(a, b, c : Float) return boolean is
+    arg : Float; 
+    begin
+        if a /= 0.0 then 
+            
+            arg := ((b**2.0) - (4.0 * (a * c))); 
+            if arg >= 0.0 then 
+                root1 := (-b + Sqrt(arg))/(2.0*a); 
+                root2 := (-b - Sqrt(arg))/(2.0*a); 
+                return true;
+            else 
+                New_Line;
+                Put("*** quadraticRoots(): b^2 - 4ac is negative!");
+                root1 := 0.0;
+                root2 := 0.0;
+                return false;  
+            end if; 
+        else
+            New_Line;
+            Put("*** QuadraticRoots(): a is zero!"); 
+            root1 := 0.0;
+            root2 := 0.0;                
+            return false; 
+        end if; 
+
+    end; 
+
+
+begin
+New_Line;
+Put("Quadratic equation calculator: ");
+
+New_Line;
+Put("A: ");
+Get(a);
+
+New_Line;
+Put("B: ");
+Get(b);
+
+New_Line;
+Put("C: ");
+Get(c); 
+
+
+if quadraticRoots(a, b, c) then 
+    New_Line;
+    Put("+x = ");
+    Put(root1); 
+    New_Line;
+    Put("-x = ");
+    Put(root2); 
+end if; 
+
+end quadratic;
+bmg23@gold10:~/214/projects/05$ gnatmake quadratic
+gnatmake: "quadratic" up to date.
+bmg23@gold10:~/214/projects/05$ ./quadratic 
+
+Quadratic equation calculator: 
+A: -4
+
+B: 5
+
+C: 6
+
++x = -7.50000E-01
+-x =  2.00000E+00
+bmg23@gold10:~/214/projects/05$ ./quadratic 
+
+Quadratic equation calculator: 
+A: 0
+
+B: 1
+
+C: 2
+
+*** QuadraticRoots(): a is zero!
+bmg23@gold10:~/214/projects/05$ ./quadratic 
+
+Quadratic equation calculator: 
+A: 3
+
+B: 4
+
+C: 5
+
+*** quadraticRoots(): b^2 - 4ac is negative!
+bmg23@gold10:~/214/projects/05$ exit
+
+Script done on Tue 05 Mar 2019 08:36:47 PM EST
+Script started on Tue 05 Mar 2019 08:24:31 PM EST
+bmg23@gold10:~/214/projects/05$ cd clojure/src
+bmg23@gold10:~/214/projects/05/clojure/src$ cat *
+;;Quadratics.clj
+;; Program: uses a subprogram to compute the roots of 
+;; a quadratic equation.
+;; Author: Brian Goins (bmg23)
+;; Date: 03/04/2019
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(ns quadratic)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;quadraticRoots
+;;Input: a, b, c 3 numbers                          
+;;Output: vector holding the positive and negative  
+;;        roots from the quadratic equation.        
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn quadraticRoots [a b c]
+    (if (> a 0)
+        ;;True Part
+        (let [arg (- (* b b) (* 4 a c))]
+            (if (> arg 0)
+                ;;True Part
+                (let [sqrtArg (Math/sqrt arg)
+                    root1 (/ (+ (- b) sqrtArg) (* 2 a))
+                    root2 (/ (- (- b) sqrtArg) (* 2 a))]
+                    (vector root1 root2 1)
+                )
+                ;;False Part
+                (
+                    (print "\n*** quadraticRoots(): b^2 - 4ac is negative!") (flush)
+                    (vector 0 0 0)
+                )
+            )
+        )
+        ;;False Part
+        (
+            (print "\n*** QuadraticRoots(): a is zero!") (flush)
+            (vector 0 0 0)
+        )
+    )
+)
+
+
+(defn -main[]
+    (print "\nQuadratic equation calculator (a b c): ") (flush)
+    (let [  a (read)
+            b (read)
+            c (read)
+            result (quadraticRoots a b c)
+            root1 (get result 0)
+            root2 (get result 1)
+            torf (get result 2)
+        ]
+
+        (if (> torf 0)
+            ((print "\n+x = ") (print root1)
+            (print "\n-x = ") (print root2)
+            (flush))
+        )
+    )
+
+)bmg23@gold10:~/214/projects/05/clojure/src$ cd ..
+bmg23@gold10:~/214/projects/05/clojure$ clojure -m quadratic
+
+Quadratic equation calculator (a b c): 2 -14 24
+
++x = 4.0
+-x = 3.0
+
+bmg23@gold10:~/214/projects/05/clojure$ clojure -m quadratic
+
+Quadratic equation calculator (a b c): 0 1 2
+
+*** QuadraticRoots(): a is zero!
+
+bmg23@gold10:~/214/projects/05/clojure$ clojure -m quadratic
+
+Quadratic equation calculator (a b c): 3 4 5
+
+*** quadraticRoots(): b^2 - 4ac is negative!
+
+bmg23@gold10:~/214/projects/05/clojure$ exit
+
+Script done on Tue 05 Mar 2019 08:25:21 PM EST
+Script started on Tue 05 Mar 2019 08:15:02 PM EST
+catbmg23@gold10:~/214/projects/05$ cat *.java
+/*Quadratics.java
+ * Program: uses a subprogram to compute the roots of 
+ * a quadratic equation.
+ * Author: Brian Goins (bmg23)
+ * Date: 03/04/2019
+********************************************************/
+
+import java.util.Scanner; 
+import java.lang.Math; 
+
+public class Quadratic
+{
+    public static double root1; 
+    public static double root2;
+
+
+    public static void main(String[] args) {
+        double a, b, c;
+         
+        root1 = root2 = 0.0; 
+        Scanner keyboard = new Scanner(System.in); 
+        
+        System.out.print("\nQuadratic equation calculator: "); 
+        
+        System.out.print("\nA: ");
+        a = keyboard.nextDouble();
+        System.out.print("\nB: ");
+        b = keyboard.nextDouble();
+        System.out.print("\nC: ");
+        c = keyboard.nextDouble();
+
+       
+       if (quadraticRoots(a,b,c))
+       { 
+            System.out.print("\n+x = " + root1);
+            System.out.print("\n-x = " + root2);
+            System.out.print("\n");
+        }
+        
+        keyboard.close();
+    }//end of Main. 
+
+    public static boolean quadraticRoots(double a, double b, double c)
+    {
+
+        if (a != 0) 
+        {
+            double arg = Math.pow(b, 2.0) - 4 * a * c; 
+            if (arg >= 0) {
+                root1 = (-b + Math.sqrt(arg))/(2*a);
+                root2 = (-b - Math.sqrt(arg))/(2*a); 
+
+                
+
+                return true; 
+            } else {
+                System.out.print("\n*** quadraticRoots(): b^2 - 4ac is negative!\n"); 
+                root1 = root2 = 0.0;
+                return false; 
+            }
+        } 
+        else 
+        {
+            System.out.print("\n*** QuadraticRoots(): a is zero!\n"); 
+            root1 = root2 = 0.0;
+            return false; 
+        }
+
+        
+    }//end of function quadraticRoots.
+
+
+
+    
+}//end of class Quadratic. 
+bmg23@gold10:~/214/projects/05$ javac Quadratic.J[Kjava
+bmg23@gold10:~/214/projects/05$ java Quadratic.[K
+
+Quadratic equation calculator: 
+A: -4
+
+B: 5
+
+C: 6
+
++x = -0.75
+-x = 2.0
+bmg23@gold10:~/214/projects/05$ java Quadratic
+
+Quadratic equation calculator: 
+A: 0
+
+B: 1
+
+C: 2
+
+*** QuadraticRoots(): a is zero!
+bmg23@gold10:~/214/projects/05$ java Quadratic
+
+Quadratic equation calculator: 
+A: 3
+
+B: 4
+
+C: 5
+
+*** quadraticRoots(): b^2 - 4ac is negative!
+bmg23@gold10:~/214/projects/05$ exit
+
+Script done on Tue 05 Mar 2019 08:19:21 PM EST
+Script started on Tue 05 Mar 2019 08:36:52 PM EST
+bmg23@gold10:~/214/projects/05$ cat *rb[K[K.rb
+## Quadratics.rb
+## Program: uses a subprogram to compute the roots of 
+## a quadratic equation.
+## Author: Brian Goins (bmg23)
+## Date: 03/04/2019
+#######################################################
+
+
+def quadraticRoots(a, b, c) 
+    if a != 0 
+        args = (b * b) - (4 * a * c)
+        if args >= 0
+            root1 = (-b + Math.sqrt(args))/(2*a)
+            root2 = (-b - Math.sqrt(args))/(2*a)
+            array = [root1, root2, 1]
+            return array
+        else 
+            print "\n*** quadraticRoots(): b^2 - 4ac is negative!"
+            array = [0, 0, 0]
+            return array
+        end
+    else 
+        print "\n*** QuadraticRoots(): a is zero!"
+        array = [0, 0, 0]
+        return array
+    end           
+end
+
+
+if __FILE__ == $0
+    print "Quadratic Equation Calculator: "
+    
+    print "\nA: "
+    a = gets.chomp.to_f
+
+    print "\nB: "
+    b = gets.chomp.to_f
+
+    print "\nC: "
+    c = gets.chomp.to_f
+
+
+    array = quadraticRoots(a, b, c)
+    root1 = array[0]
+    root2 = array[1]
+    torf = array[2]
+
+
+    if torf > 0
+        print "\n+x = "
+        print root1
+        
+        print "\n-x = "
+        print root2
+    end 
+
+    print "\n\n"
+endbmg23@gold10:~/214/projects/05$ ruby quadratic.rb
+Quadratic Equation Calculator: 
+A: -4
+
+B: 5
+
+C: 6
+
++x = -0.75
+-x = 2.0
+
+bmg23@gold10:~/214/projects/05$ ruby quadratic.rb
+Quadratic Equation Calculator: 
+A: 0
+
+B: 1
+
+C: 2
+
+*** QuadraticRoots(): a is zero!
+
+bmg23@gold10:~/214/projects/05$ ruby quadratic.rb
+Quadratic Equation Calculator: 
+A: 3
+
+B: 4
+
+C: 5
+
+*** quadraticRoots(): b^2 - 4ac is negative!
+
+bmg23@gold10:~/214/projects/05$ exit
+
+Script done on Tue 05 Mar 2019 08:37:19 PM EST

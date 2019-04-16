@@ -1,0 +1,1745 @@
+Script started on Sat 13 Apr 2019 07:19:50 PM EDT
+bmg23@maroon30:~/214/projects/08$ cd Ada
+bmg23@maroon30:~/214/projects/08/Ada$ dir
+temp_package.adb  temp_package.ads  temp_package.ali  temp_package.o  temp_tester  temp_tester.adb  temp_tester.ali  temp_tester.o
+bmg23@maroon30:~/214/projects/08/Ada$ cat temp_package.adb
+-- temp_packae.adb, this class stores a 
+-- Degrees and Scale of a Temperature. 
+--  
+-- Temp class: 
+--      - Stores degrees and scale
+--      - Accessors 
+--      - Conversion Functions
+--      - Relation Operations 
+-- 
+-- 
+-- Author: Brian Goins (bmg23)
+-- Date: 4/4/2019 
+-------------------------------------------
+
+with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Float_Text_IO; use Ada.Float_Text_IO;
+
+
+
+package body Temp_Package is 
+
+    -------------------------
+    --Init
+    -------------------------
+    procedure Init(Tp : out Temperature; Degrees : in Float; Scale : in Character) is 
+    begin 
+        if(tempCheck(Degrees, Scale)) then  
+            Tp.MyDegrees := Degrees;
+            Tp.MyScale := Scale;
+        end if;  
+    end Init; 
+
+    ----------------------------------------------------------------
+    --                          GETTERS                           --
+    ----------------------------------------------------------------
+    function getDegrees(Tp : in Temperature) return Float is
+    begin 
+        return Tp.MyDegrees; 
+    end getDegrees; 
+
+    function getScale(Tp : in Temperature) return Character is 
+    begin 
+        return Tp.MyScale;
+    end getScale; 
+
+    ----------------------------------------------------------------
+    --                          COVERTERS                         --
+    ----------------------------------------------------------------
+    -- All converters                                             --
+    -- Receives: temperature object.                              --
+    -- Returns: temperature object converted                      --
+    -- to a different scale.                                      --
+    ----------------------------------------------------------------
+
+    --To Fahrenheit
+    function toF(Tp : Temperature) return Temperature is 
+        newDegrees : Float; 
+        newTemp : Temperature;
+    begin 
+        if(getScale(Tp) = 'C') then --Convert from Celsius
+
+            newDegrees := (Tp.MyDegrees*1.8) + 32.0;
+            Init(newTemp, newDegrees, 'F');
+            return newTemp;
+
+        elsif(getScale(Tp) = 'K') then --Convert from Kelvin
+
+            newDegrees := ((Tp.MyDegrees - 273.15) * 1.8) + 32.0; 
+            Init(newTemp, newDegrees, 'F');
+            return newTemp;
+        else 
+            return Tp; 
+        end if; 
+    end toF; 
+
+    --To Celsius
+    function toC(Tp : Temperature) return Temperature is 
+        newDegrees : Float;
+        newTemp : Temperature;
+    begin 
+        if(Tp.MyScale = 'F') then --Convert from Fahrenheit
+
+            newDegrees := (Tp.MyDegrees - 32.0) * (5.0/9.0);  
+            Init(newTemp, newDegrees, 'C');
+            return newTemp;
+
+        elsif(Tp.MyScale = 'K') then --Convert from Kelvin
+
+           newDegrees := (Tp.MyDegrees - 273.15); 
+           Init(newTemp, newDegrees, 'C');
+           return newTemp;
+        else 
+            return Tp;
+        end if; 
+    end toC;
+
+    --To Kelvin
+    function toK(Tp : Temperature) return Temperature is 
+        newDegrees : Float; 
+        newTemp : Temperature;
+    begin 
+        if(Tp.MyScale = 'F') then --Convert from Fahrenheit
+
+            newDegrees := ((Tp.MyDegrees - 32.0) * (5.0/9.0)) + 273.15; 
+            Init(newTemp, newDegrees, 'K');
+            return newTemp;
+
+        elsif(Tp.MyScale = 'C') then --Convert from Celsius
+
+           newDegrees := (Tp.MyDegrees + 273.15); 
+           Init(newTemp, newDegrees, 'K');
+           return newTemp;
+        else 
+            return Tp; 
+        end if; 
+    end toK;  
+    
+    ----------------------------------------------------------------
+    --                       I/O OPERATIONS                       --
+    ----------------------------------------------------------------
+    --Read Temp
+    function readTemp(Tp : Temperature) return Temperature is 
+        degrees : Float; 
+        scale : Character; 
+        newTemp : Temperature; 
+    begin 
+        Put("Enter degrees: "); 
+        Get(degrees);
+        Put("Enter scale: ");
+        Get(scale); 
+
+        if(tempCheck(degrees, scale)) then 
+            Init(newTemp, degrees, scale); 
+            return newTemp; 
+        else 
+            Init(newTemp, 0.0, 'F');
+            return newTemp; 
+        end if; 
+    end readTemp; 
+
+    --Print Temp 
+    procedure printTemp(Tp : in Temperature) is 
+    begin 
+        Put(getDegrees(Tp)); 
+        Put(" ");
+        Put(getScale(Tp)); 
+    end printTemp; 
+
+    ----------------------------------------------------------------
+    --                    ADJUSTMENT OPERATIONS                   --
+    ----------------------------------------------------------------
+    --Raise 
+    function raiseTemp(temp : Temperature; stepValue : Float) return Temperature is 
+    newTemp : Temperature;
+    newDegrees : Float; 
+    begin 
+        newDegrees := getDegrees(temp) + stepValue; 
+        Init(newTemp, newDegrees, getScale(temp));
+        return newTemp;
+    end raiseTemp; 
+
+    --Lower 
+    function lowerTemp(temp : Temperature; stepValue : Float) return Temperature is
+    newTemp : Temperature;
+    newDegrees : Float; 
+    begin 
+        newDegrees := getDegrees(temp) + stepValue; 
+        if(tempCheck(newDegrees, getScale(temp))) then 
+            Init(newTemp, newDegrees, getScale(temp));
+            return newTemp;
+        else 
+            return temp; 
+        end if; 
+    end lowerTemp;
+
+    ----------------------------------------------------------------
+    --                    RELATIONAL OPERATIONS                   --
+    ----------------------------------------------------------------
+    function equals(t1 : in Temperature; t2 : in Temperature) return Boolean is
+    temp1 : Temperature;
+    temp2 : Temperature;
+    begin 
+        temp1 := toF(t1); 
+        temp2 := toF(t2); 
+
+        if(getDegrees(temp1) = getDegrees(temp2)) then 
+            return true; 
+        else
+            return false; 
+        end if;
+
+
+    end equals;
+
+    function lessThan(leftSide : in Temperature; rightSide : in Temperature) return Boolean is
+    lS : Temperature;
+    rS : Temperature; 
+
+    begin 
+        lS := toF(leftSide);
+        rS := toF(rightSide); 
+
+        if(getDegrees(lS) <= getDegrees(rS)) then
+            return true; 
+        else    
+            return false; 
+        end if; 
+    end lessThan; 
+
+    -------------------------------
+    -- tempCheck()
+    -- In: var, var 
+    -- Out: bool
+    -- 
+    -- Takes two
+    -- Checks that they are actual
+    -- temps and of correct scale. 
+    --------------------------------
+    function tempCheck(degrees : Float; scale : Character) return Boolean is  
+    begin 
+        if (scale = 'F' and degrees >= -459.67) then
+            return true; 
+        elsif (scale = 'C' and degrees >= -273.15) then 
+            return true; 
+        elsif (scale = 'K' and degrees >= 0.0) then 
+            return true; 
+        else 
+            return false; 
+        end if; 
+    end tempCheck;  
+
+end Temp_Package; 
+bmg23@maroon30:~/214/projects/08/Ada$ cat temp_package.adb[K[Kds
+-- temp_packae.adb, header file for 
+-- temp_package.adb
+-- Author: Brian Goins (bmg23)
+-- Date: 4/4/2019 
+-------------------------------------------
+
+
+
+
+with Ada.Text_IO; use Ada.Text_IO;
+
+
+package Temp_Package is 
+
+    type Temperature is private; 
+
+    -----------------------------Public Declarations--------------------------
+    
+    --Constructor 
+    procedure Init(Tp : out Temperature; Degrees : in Float; Scale : in Character);
+
+
+    --Getters
+    function getDegrees( Tp : in Temperature ) return Float; 
+    function getScale( Tp : in Temperature ) return Character; 
+
+    --Setters
+    function toF(Tp : Temperature) return Temperature;
+    function toC(Tp : Temperature) return Temperature; 
+    function toK(Tp : Temperature) return Temperature;
+
+    --I/O Operations
+    function readTemp(Tp : Temperature) return Temperature; 
+    procedure printTemp(Tp : in Temperature);
+
+    --Adjustment Operations
+    function raiseTemp(temp : Temperature; stepValue : Float) return Temperature;
+    function lowerTemp(temp : Temperature; stepValue : Float) return Temperature;
+
+    --Relational Operations
+    function equals(t1 : in Temperature; t2 : in Temperature) return Boolean; 
+    function lessThan(leftSide : in Temperature; rightSide : in Temperature) return Boolean; 
+    function tempCheck(degrees : Float; scale : Character) return Boolean; 
+
+
+
+
+    -----------------------------Private Declarations-------------------------
+    
+    private 
+
+        --Temperature 
+        type Temperature is 
+            record 
+                MyDegrees : Float; 
+                MyScale : Character; 
+            end record; 
+
+
+end Temp_Package; 
+                bmg23@maroon30:~/214/projects/08/Ada$ cat temp_tester.adb
+--temp_tester.adb
+--
+--
+--
+--
+---------------------------------------------------------
+
+with temp_package; use temp_package; 
+with Ada.Float_Text_IO; use Ada.Float_Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
+
+procedure temp_tester is 
+
+    baseTemp : Temperature;
+    limitTemp : Temperature; 
+    stepValue : Float;   
+
+
+    procedure table(baseTemp : Temperature; limitTemp : Temperature; stepValue : Float) is
+        temp : Temperature; 
+    
+    begin 
+        temp := baseTemp; 
+        --Print out table header.
+        New_Line; New_Line;  
+        Put("-----------------------------Temperature Table----------------------------------"); 
+        New_Line; 
+        put("   Fahrenheit       ");        put("Celsius              ");       put("Kelvin");    New_Line;  
+
+        while lessThan(temp, limitTemp) 
+        loop
+            --Print temp in Fahrenheit. 
+            temp := toF(temp); 
+            printTemp(temp); 
+
+            Put("   "); 
+
+            --Print temp in Celsius
+            temp := toC(temp); 
+            printTemp(temp); 
+
+            Put("    "); 
+
+
+            --Print temp in Kelvin
+            temp := toK(temp); 
+            printTemp(temp); 
+
+            New_Line; 
+
+            --Raise baseTemp
+            temp := raiseTemp(temp, stepValue);
+
+        end loop; 
+    
+    end table; 
+        
+
+
+
+
+
+begin 
+   baseTemp := readTemp(baseTemp); 
+   limitTemp := readTemp(limitTemp); 
+   
+   New_Line;   
+   Put("Enter a stepValue: "); 
+   Get(stepValue); 
+
+   table(baseTemp, limitTemp, stepValue);  
+
+   baseTemp := readTemp(baseTemp); 
+   limitTemp := readTemp(limitTemp); 
+   
+   New_Line;   
+   Put("Enter a stepValue: "); 
+   Get(stepValue); 
+
+   table(baseTemp, limitTemp, stepValue);  
+
+end temp_tester; bmg23@maroon30:~/214/projects/08/Ada$ gnatmake temp_tester
+gcc-5 -c temp_tester.adb
+temp_tester.adb:64:25: warning: "baseTemp" may be referenced before it has a value
+temp_tester.adb:65:26: warning: "limitTemp" may be referenced before it has a value
+gnatbind-5 -x temp_tester.ali
+gnatlink-5 temp_tester.ali
+bmg23@maroon30:~/214/projects/08/Ada$ ./temp_tester 
+Enter degrees: 0  
+Enter scale: F
+Enter degrees: 100
+Enter scale: C
+
+Enter a stepValue: 2.5
+
+
+-----------------------------Temperature Table----------------------------------
+   Fahrenheit       Celsius              Kelvin
+ 0.00000E+00 F   -1.77778E+01 C     2.55372E+02 K
+ 4.50001E+00 F   -1.52778E+01 C     2.57872E+02 K
+ 9.00001E+00 F   -1.27778E+01 C     2.60372E+02 K
+ 1.35000E+01 F   -1.02778E+01 C     2.62872E+02 K
+ 1.80000E+01 F   -7.77777E+00 C     2.65372E+02 K
+ 2.25000E+01 F   -5.27777E+00 C     2.67872E+02 K
+ 2.70000E+01 F   -2.77777E+00 C     2.70372E+02 K
+ 3.15000E+01 F   -2.77771E-01 C     2.72872E+02 K
+ 3.60000E+01 F    2.22223E+00 C     2.75372E+02 K
+ 4.05000E+01 F    4.72223E+00 C     2.77872E+02 K
+ 4.50000E+01 F    7.22223E+00 C     2.80372E+02 K
+ 4.95000E+01 F    9.72223E+00 C     2.82872E+02 K
+ 5.40000E+01 F    1.22222E+01 C     2.85372E+02 K
+ 5.85000E+01 F    1.47222E+01 C     2.87872E+02 K
+ 6.30000E+01 F    1.72222E+01 C     2.90372E+02 K
+ 6.75000E+01 F    1.97222E+01 C     2.92872E+02 K
+ 7.20000E+01 F    2.22222E+01 C     2.95372E+02 K
+ 7.65000E+01 F    2.47222E+01 C     2.97872E+02 K
+ 8.10000E+01 F    2.72222E+01 C     3.00372E+02 K
+ 8.55000E+01 F    2.97222E+01 C     3.02872E+02 K
+ 9.00000E+01 F    3.22222E+01 C     3.05372E+02 K
+ 9.45000E+01 F    3.47222E+01 C     3.07872E+02 K
+ 9.90000E+01 F    3.72222E+01 C     3.10372E+02 K
+ 1.03500E+02 F    3.97222E+01 C     3.12872E+02 K
+ 1.08000E+02 F    4.22222E+01 C     3.15372E+02 K
+ 1.12500E+02 F    4.47222E+01 C     3.17872E+02 K
+ 1.17000E+02 F    4.72222E+01 C     3.20372E+02 K
+ 1.21500E+02 F    4.97222E+01 C     3.22872E+02 K
+ 1.26000E+02 F    5.22222E+01 C     3.25372E+02 K
+ 1.30500E+02 F    5.47222E+01 C     3.27872E+02 K
+ 1.35000E+02 F    5.72222E+01 C     3.30372E+02 K
+ 1.39500E+02 F    5.97222E+01 C     3.32872E+02 K
+ 1.44000E+02 F    6.22222E+01 C     3.35372E+02 K
+ 1.48500E+02 F    6.47222E+01 C     3.37872E+02 K
+ 1.53000E+02 F    6.72222E+01 C     3.40372E+02 K
+ 1.57500E+02 F    6.97222E+01 C     3.42872E+02 K
+ 1.62000E+02 F    7.22222E+01 C     3.45372E+02 K
+ 1.66500E+02 F    7.47222E+01 C     3.47872E+02 K
+ 1.71000E+02 F    7.72222E+01 C     3.50372E+02 K
+ 1.75500E+02 F    7.97222E+01 C     3.52872E+02 K
+ 1.80000E+02 F    8.22222E+01 C     3.55372E+02 K
+ 1.84500E+02 F    8.47222E+01 C     3.57872E+02 K
+ 1.89000E+02 F    8.72222E+01 C     3.60372E+02 K
+ 1.93500E+02 F    8.97222E+01 C     3.62872E+02 K
+ 1.98000E+02 F    9.22222E+01 C     3.65372E+02 K
+ 2.02500E+02 F    9.47222E+01 C     3.67872E+02 K
+ 2.07000E+02 F    9.72222E+01 C     3.70372E+02 K
+ 2.11500E+02 F    9.97222E+01 C     3.72872E+02 K
+Enter degrees: 0
+Enter scale: K
+Enter degrees: 212
+Enter scale: F
+
+Enter a stepValue: 20.0
+
+
+-----------------------------Temperature Table----------------------------------
+   Fahrenheit       Celsius              Kelvin
+-4.59670E+02 F   -2.73150E+02 C     0.00000E+00 K
+-4.23670E+02 F   -2.53150E+02 C     2.00000E+01 K
+-3.87670E+02 F   -2.33150E+02 C     4.00000E+01 K
+-3.51670E+02 F   -2.13150E+02 C     6.00000E+01 K
+-3.15670E+02 F   -1.93150E+02 C     7.99999E+01 K
+-2.79670E+02 F   -1.73150E+02 C     9.99999E+01 K
+-2.43670E+02 F   -1.53150E+02 C     1.20000E+02 K
+-2.07670E+02 F   -1.33150E+02 C     1.40000E+02 K
+-1.71670E+02 F   -1.13150E+02 C     1.60000E+02 K
+-1.35670E+02 F   -9.31501E+01 C     1.80000E+02 K
+-9.96701E+01 F   -7.31501E+01 C     2.00000E+02 K
+-6.36701E+01 F   -5.31501E+01 C     2.20000E+02 K
+-2.76701E+01 F   -3.31501E+01 C     2.40000E+02 K
+ 8.32990E+00 F   -1.31501E+01 C     2.60000E+02 K
+ 4.43299E+01 F    6.84995E+00 C     2.80000E+02 K
+ 8.03299E+01 F    2.68499E+01 C     3.00000E+02 K
+ 1.16330E+02 F    4.68499E+01 C     3.20000E+02 K
+ 1.52330E+02 F    6.68499E+01 C     3.40000E+02 K
+ 1.88330E+02 F    8.68499E+01 C     3.60000E+02 K
+bmg23@maroon30:~/214/projects/08/Ada$ exit
+
+Script done on Sat 13 Apr 2019 07:21:41 PM EDT
+Script started on Sat 13 Apr 2019 07:18:35 PM EDT
+bmg23@maroon30:~/214/projects/08$ cd clojure/src
+bmg23@maroon30:~/214/projects/08/clojure/src$ dir
+Temperature.clj  tempTester.clj
+bmg23@maroon30:~/214/projects/08/clojure/src$ cat *
+;; Temperature.clj, this class stores a 
+;; Degrees and Scale of a Temperature. 
+;;  
+;; Temp class: 
+;;      - Stores degrees and scale
+;;      - Accessors 
+;;      - Conversion Functions
+;;      - Relation Operations 
+;; 
+;; 
+;; Author: Brian Goins (bmg23)
+;; Date: 4/4/2019 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+;;Create a record for Temperature. 
+(defrecord Temperature [degrees scale])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Check Temp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn checkTemp [degrees scale] 
+    (if (and (= scale "F") (<= degrees -459.67))
+        ;;True Part
+        true    
+        
+        ;;False Part
+        (if (and (= scale "C") (<= degrees -273.15))
+            ;;True Part
+            true    
+
+            ;;False Part
+            (if (and (= scale "F") (<= degrees -459.67))
+                ;;True Part
+                true    
+
+                ;;False Part
+                false
+            )
+
+        )    
+    )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; make-Temperature constructs a Temperature object from a float and character
+;; Receive: degrees (double), scale (character)
+;; Return: the Temperature (degrees, scale)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn make-Temperature [degrees scale]
+    (if (checkTemp degrees scale)
+        (->Temperature degrees scale)
+        false
+    )
+)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                  GETTERS                                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn getDegrees [^Temperature aTemp]
+  (:degrees aTemp)
+)
+
+(defn getScale [^Temperature aTemp]
+  (:scale aTemp)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                   SETTERS                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn setDegrees [aTemp newDegrees]
+    (if (checkTemp newDegrees (:scale aTemp))
+        
+        ;;True Part
+        (->Temperature newDegrees (:scale aTemp))
+
+        ;;False Part
+        aTemp
+    )
+
+)
+
+(defn setScale [aTemp newScale]
+    (if (checkTemp (:degrees aTemp) newScale)
+        
+        ;;True Part
+        (->Temperature (:degrees aTemp) newScale)
+
+        ;;False Part
+        aTemp
+    )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                  CONVERTERS                                ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; All converters                                                             ;;
+;; Receives: temperature object.                                              ;;
+;; Returns: temperature object converted                                      ;;
+;; to a different scale.                                                      ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+
+;;To Fahrenheit
+(defn toF [aTemp]
+    (if (= "C" (getScale aTemp))
+        ;;True Part
+        (->Temperature (+ (* (:degrees aTemp) 1.8) 32) "F")
+
+        ;;False Part
+        (if (= (getScale aTemp) "K")
+                ;;True Part
+                (->Temperature (* (- (:degrees aTemp) 273.15) 1.8) "F")
+
+                ;;False Part
+                aTemp
+        )
+    )
+)
+
+;;To Celsius
+(defn toC [aTemp]
+    (if (= (getScale aTemp) "F")
+        ;;True Part
+        (->Temperature (/ (* ( - (:degrees aTemp) 32) 5) 9) "C")
+        
+        ;;False Part
+        (if (= (getScale aTemp) "K")
+            ;;True Part
+            (->Temperature (- (:degrees aTemp) 273.15) "C")
+        
+            ;;False Part
+            aTemp    
+        )
+    )
+)
+
+;;To Kelvin
+(defn toK [aTemp]
+    (if (= (:scale aTemp) "F")
+        ;;True Part
+        (->Temperature (+ (/ (* (- (:degrees aTemp) 32) 5) 9) 273.15) "K")
+
+        ;;False Part
+        (if (= (:scale aTemp) "C")
+            ;;True Part
+            (->Temperature (+ (:degrees aTemp) 273.15) "K")
+
+            ;;False Part
+            aTemp   
+        )
+    )
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                               I/O OPERATIONS                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn readTemp[]
+    (println "\nEnter degrees and scale, hit enter after each input: ")
+    (flush)
+    (->Temperature (read-string (read-line)) (read-line))
+    
+)
+
+(defn readStepValue []
+    (println "\nEnter a stepValue: ") (flush)
+    (read-string (read-line))
+
+)
+
+(defn printTemp[^Temperature aTemp]
+    (print (getDegrees aTemp))
+    (print " ")
+    (print (getScale aTemp))
+    (flush)
+
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            ADJUSTMENT OPERATIONS                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn raise [aTemp stepValue]
+    (->Temperature (+ (getDegrees aTemp) stepValue) (getScale aTemp))
+)
+
+
+(defn lower [^Temperature aTemp stepValue]
+    (if (checkTemp (- (getDegrees aTemp) stepValue) (getScale aTemp))
+        ;;True Part
+        (->Temperature (- (getDegrees aTemp) stepValue) (getScale aTemp))
+
+        ;;False Part
+        false   
+    )
+
+
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            RELATIONAL OPERATIONS                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn equals [t1 t2]
+    (let [ temp1 (toF t1)
+           temp2 (toF t2)
+         ]
+
+         (if (= (getDegrees temp1) (getDegrees temp2))
+            ;;True Part
+            true
+
+            ;;False Part
+            false          
+         )
+    )
+)
+
+(defn lessThen [lS rS]
+    (let [ leftSide (toF lS)
+           rightSide (toF rS)
+         ]
+
+         (if (= (getDegrees leftSide) (getDegrees rightSide))
+            ;;True Part
+            false
+
+            ;;False Part
+            (if (< (getDegrees leftSide) (getDegrees rightSide))
+                ;;True Part
+                true
+
+                ;;Fales Part
+                false
+            )          
+         )
+    )
+)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                            CONSOLE FUNCTIONS                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn tableHeader []
+    (print "\n\n\n\n-----------------------------Temperature Table----------------------------------")
+    (print  (str "\n" "Fahrenheit\t" "\tCelsius\t\t" "\tKelvin" "\n")) 
+    (flush)
+
+
+
+)
+
+
+(defn table [baseTemp limitTemp stepValue]
+    
+    
+        ;;Fahrenheit 
+        (printTemp (toF baseTemp))
+        (print "\t\t\t")
+
+        ;;Celsius
+        (printTemp (toC baseTemp))
+        (print "\t\t\t\t")
+
+        ;;Kelvin
+        (printTemp (toK baseTemp))
+        (print "\n")
+    
+
+
+    (let [newTemp (raise baseTemp stepValue)] 
+        (if (lessThen newTemp limitTemp)
+            ;;True Part
+            (table newTemp limitTemp stepValue)
+
+            ;;False Part
+            (print "\n")
+        )
+    )
+)
+;; TempTester.clj, Driver sed to test and run Temperature class.  
+;; This program takes three values, and uses Temperature class
+;; to create a table of values.  
+;; Tests:
+;;      - Input:  
+;;          - baseTemp
+;;          - limitTemp
+;;          - stepValue
+;;      -Output: 
+;;          - Formatted table
+;; 
+;; Author: Brian Goins (bmg23)
+;; Date: 4/5/2019
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 
+(ns tempTester) ;program name
+(load "Temperature")
+
+
+(defn -main[]
+   
+   (let [
+            baseTemp (readTemp)
+            stepValue (readStepValue)
+            limitTemp (readTemp)
+            newTemp (toF baseTemp)
+         ]     
+        
+      (tableHeader)
+            
+      (table baseTemp limitTemp stepValue)
+      (print "\n")
+   )
+
+   (let [
+            baseTemp (readTemp)
+            stepValue (readStepValue)
+            limitTemp (readTemp)
+            newTemp (toF baseTemp)
+         ]     
+        
+      (tableHeader)
+            
+      (table baseTemp limitTemp stepValue)
+      (print "\n")
+   )
+
+)
+bmg23@maroon30:~/214/projects/08/clojure/src$ cd ..
+bmg23@maroon30:~/214/projects/08/clojure$ clojure -m tempTester
+
+Enter degrees and scale, hit enter after each input: 
+0
+F
+
+Enter a stepValue: 
+2.5
+
+Enter degrees and scale, hit enter after each input: 
+100
+C
+
+
+
+
+-----------------------------Temperature Table----------------------------------
+Fahrenheit		Celsius			Kelvin
+0 F			-160/9 C				255.3722222222222 K
+2.5 F			-16.38888888888889 C				256.76111111111106 K
+5.0 F			-15.0 C				258.15 K
+7.5 F			-13.61111111111111 C				259.5388888888889 K
+10.0 F			-12.222222222222221 C				260.92777777777775 K
+12.5 F			-10.833333333333334 C				262.31666666666666 K
+15.0 F			-9.444444444444445 C				263.7055555555555 K
+17.5 F			-8.055555555555555 C				265.09444444444443 K
+20.0 F			-6.666666666666667 C				266.4833333333333 K
+22.5 F			-5.277777777777778 C				267.8722222222222 K
+25.0 F			-3.888888888888889 C				269.26111111111106 K
+27.5 F			-2.5 C				270.65 K
+30.0 F			-1.1111111111111112 C				272.0388888888889 K
+32.5 F			0.2777777777777778 C				273.42777777777775 K
+35.0 F			1.6666666666666667 C				274.81666666666666 K
+37.5 F			3.0555555555555554 C				276.2055555555555 K
+40.0 F			4.444444444444445 C				277.59444444444443 K
+42.5 F			5.833333333333333 C				278.9833333333333 K
+45.0 F			7.222222222222222 C				280.3722222222222 K
+47.5 F			8.61111111111111 C				281.76111111111106 K
+50.0 F			10.0 C				283.15 K
+52.5 F			11.38888888888889 C				284.5388888888889 K
+55.0 F			12.777777777777779 C				285.92777777777775 K
+57.5 F			14.166666666666666 C				287.31666666666666 K
+60.0 F			15.555555555555555 C				288.7055555555555 K
+62.5 F			16.944444444444443 C				290.09444444444443 K
+65.0 F			18.333333333333332 C				291.4833333333333 K
+67.5 F			19.72222222222222 C				292.8722222222222 K
+70.0 F			21.11111111111111 C				294.26111111111106 K
+72.5 F			22.5 C				295.65 K
+75.0 F			23.88888888888889 C				297.0388888888889 K
+77.5 F			25.27777777777778 C				298.42777777777775 K
+80.0 F			26.666666666666668 C				299.81666666666666 K
+82.5 F			28.055555555555557 C				301.2055555555555 K
+85.0 F			29.444444444444443 C				302.59444444444443 K
+87.5 F			30.833333333333332 C				303.9833333333333 K
+90.0 F			32.22222222222222 C				305.3722222222222 K
+92.5 F			33.611111111111114 C				306.76111111111106 K
+95.0 F			35.0 C				308.15 K
+97.5 F			36.388888888888886 C				309.5388888888889 K
+100.0 F			37.77777777777778 C				310.92777777777775 K
+102.5 F			39.166666666666664 C				312.31666666666666 K
+105.0 F			40.55555555555556 C				313.7055555555555 K
+107.5 F			41.94444444444444 C				315.09444444444443 K
+110.0 F			43.333333333333336 C				316.4833333333333 K
+112.5 F			44.72222222222222 C				317.8722222222222 K
+115.0 F			46.111111111111114 C				319.26111111111106 K
+117.5 F			47.5 C				320.65 K
+120.0 F			48.888888888888886 C				322.0388888888889 K
+122.5 F			50.27777777777778 C				323.42777777777775 K
+125.0 F			51.666666666666664 C				324.81666666666666 K
+127.5 F			53.05555555555556 C				326.2055555555555 K
+130.0 F			54.44444444444444 C				327.59444444444443 K
+132.5 F			55.833333333333336 C				328.9833333333333 K
+135.0 F			57.22222222222222 C				330.3722222222222 K
+137.5 F			58.611111111111114 C				331.76111111111106 K
+140.0 F			60.0 C				333.15 K
+142.5 F			61.388888888888886 C				334.5388888888889 K
+145.0 F			62.77777777777778 C				335.92777777777775 K
+147.5 F			64.16666666666667 C				337.31666666666666 K
+150.0 F			65.55555555555556 C				338.7055555555555 K
+152.5 F			66.94444444444444 C				340.09444444444443 K
+155.0 F			68.33333333333333 C				341.4833333333333 K
+157.5 F			69.72222222222223 C				342.8722222222222 K
+160.0 F			71.11111111111111 C				344.26111111111106 K
+162.5 F			72.5 C				345.65 K
+165.0 F			73.88888888888889 C				347.0388888888889 K
+167.5 F			75.27777777777777 C				348.42777777777775 K
+170.0 F			76.66666666666667 C				349.81666666666666 K
+172.5 F			78.05555555555556 C				351.2055555555555 K
+175.0 F			79.44444444444444 C				352.59444444444443 K
+177.5 F			80.83333333333333 C				353.9833333333333 K
+180.0 F			82.22222222222223 C				355.3722222222222 K
+182.5 F			83.61111111111111 C				356.76111111111106 K
+185.0 F			85.0 C				358.15 K
+187.5 F			86.38888888888889 C				359.5388888888889 K
+190.0 F			87.77777777777777 C				360.92777777777775 K
+192.5 F			89.16666666666667 C				362.31666666666666 K
+195.0 F			90.55555555555556 C				363.7055555555555 K
+197.5 F			91.94444444444444 C				365.09444444444443 K
+200.0 F			93.33333333333333 C				366.4833333333333 K
+202.5 F			94.72222222222223 C				367.8722222222222 K
+205.0 F			96.11111111111111 C				369.26111111111106 K
+207.5 F			97.5 C				370.65 K
+210.0 F			98.88888888888889 C				372.0388888888889 K
+
+
+
+Enter degrees and scale, hit enter after each input: 
+0
+K
+
+Enter a stepValue: 
+20.0
+
+Enter degrees and scale, hit enter after each input: 
+100   212
+F
+
+
+
+
+-----------------------------Temperature Table----------------------------------
+Fahrenheit		Celsius			Kelvin
+-491.66999999999996 F			-273.15 C				0 K
+-455.66999999999996 F			-253.14999999999998 C				20.0 K
+-419.66999999999996 F			-233.14999999999998 C				40.0 K
+-383.66999999999996 F			-213.14999999999998 C				60.0 K
+-347.66999999999996 F			-193.14999999999998 C				80.0 K
+-311.66999999999996 F			-173.14999999999998 C				100.0 K
+-275.66999999999996 F			-153.14999999999998 C				120.0 K
+-239.66999999999996 F			-133.14999999999998 C				140.0 K
+-203.66999999999996 F			-113.14999999999998 C				160.0 K
+-167.66999999999996 F			-93.14999999999998 C				180.0 K
+-131.66999999999996 F			-73.14999999999998 C				200.0 K
+-95.66999999999996 F			-53.14999999999998 C				220.0 K
+-59.66999999999996 F			-33.14999999999998 C				240.0 K
+-23.66999999999996 F			-13.149999999999977 C				260.0 K
+12.330000000000041 F			6.850000000000023 C				280.0 K
+48.33000000000004 F			26.850000000000023 C				300.0 K
+84.33000000000004 F			46.85000000000002 C				320.0 K
+120.33000000000004 F			66.85000000000002 C				340.0 K
+156.33000000000004 F			86.85000000000002 C				360.0 K
+192.33000000000004 F			106.85000000000002 C				380.0 K
+
+
+bmg23@maroon30:~/214/projects/08/clojure$ exit
+
+Script done on Sat 13 Apr 2019 07:19:40 PM EDT
+Script started on Sat 13 Apr 2019 07:16:41 PM EDT
+bmg23@maroon30:~/214/projects/08$ cd java
+bash: cd: java: No such file or directory
+bmg23@maroon30:~/214/projects/08$ cd Java
+bmg23@maroon30:~/214/projects/08/Java$ dir
+Temperature.class  Temperature.java  TempTester.class  TempTester.java
+bmg23@maroon30:~/214/projects/08/Java$ cat *.java
+/* Temperature.java, this class stores a 
+ * Degrees and Scale of a Temperature. 
+ *  
+ * Temp class: 
+ *      - Stores degrees and scale
+ *      - Accessors 
+ *      - Conversion Functions
+ *      - Relation Operations 
+ * 
+ * 
+ * Author: Brian Goins (bmg23)
+ * Date: 4/4/2019 
+ ************************************/ 
+import java.util.*;
+import java.lang.*; 
+import java.math.*;
+
+class Temperature 
+{   
+    /*****************************INITIALIZATION**********************/
+    public Temperature(Double degrees, char scale) {
+      if(tempCheck(degrees, scale)) {
+          tempDegrees = degrees;
+          tempScale = scale; 
+      } else {
+        System.out.println("Failed to initialize new Temp.");
+      }
+    
+    }
+
+    /*****************************GETTERS****************************/
+     public Double getDegrees() {
+        return tempDegrees; 
+    }
+
+    public char getScale() {
+        return tempScale; 
+    }
+
+    /*****************************SETTERS****************************/
+    public void setDegrees(double newDegrees) {
+        if(tempCheck(newDegrees, tempScale)) {
+            tempDegrees = newDegrees; 
+        } else { 
+            System.out.print("setDegrees(): New degrees failed.");  
+        }
+    }
+
+    public void setScale(char newScale) {
+        if(tempCheck(tempDegrees, newScale)) {
+            tempScale = newScale; 
+        } else { 
+            System.out.print("setScale(): New scale failed."); 
+        }
+    }
+
+
+    /*****************************CONVERTERS****************************/
+    /* All converters
+     * Receives: temperature object. 
+     * Returns: temperature object converted
+     * to a different scale. 
+     * 
+     *****************************************/ 
+    
+    //To Fahrenheit 
+    public Temperature toF() {
+        if(tempScale == 'C') { //Convert from Celsius
+            Double newDegrees = (tempDegrees*1.8) + 32; 
+            Temperature temp = new Temperature(newDegrees, 'F');
+            return temp; 
+        } 
+        else if(tempScale == 'K') { //Convert from Kelvin
+            Double newDegrees = ((tempDegrees - 273.15) * 1.8) + 32; 
+            Temperature temp = new Temperature(newDegrees, 'F');
+            return temp; 
+        } else { //Return the same temperature. 
+            Temperature temp = new Temperature(tempDegrees, tempScale); 
+            return temp; 
+        }
+    }
+    
+    //To Celsius
+    public Temperature toC() {
+        if(tempScale == 'F') { //Convert from Fahrenheit 
+            Double newDegrees = (tempDegrees - 32) * 5/9; 
+            Temperature temp = new Temperature(newDegrees, 'C'); 
+            return temp;
+        } 
+        else if(tempScale == 'K') { //Convert from Kelvin 
+            Double newDegrees = (tempDegrees - 273.15); 
+            Temperature temp = new Temperature(newDegrees, 'C');
+            return temp; 
+        } else { //Return the same temperature. 
+            Temperature temp = new Temperature(tempDegrees, tempScale); 
+            return temp; 
+        }
+    }
+
+    //To Kelvin 
+    public Temperature toK() {
+        if(tempScale == 'F') { //Convert from Fahrenheit 
+            Double newDegrees = ((tempDegrees - 32) * 5/9) + 273.15; 
+            Temperature temp = new Temperature(newDegrees, 'K');
+            return temp; 
+        }
+        else if(tempScale == 'C') { //Convert from Celsius
+            Double newDegrees = (tempDegrees + 273.15); 
+            Temperature temp = new Temperature(newDegrees, 'K');
+            return temp; 
+        } else { //Return the same temperature.  
+            Temperature temp = new Temperature(tempDegrees, tempScale); 
+            return temp; 
+        }
+    }
+    
+    
+    /*********************************I/O OPERATIONS***********************************/
+    public void readTemp(String line) { 
+        String[] arrayLine = line.split(" "); 
+    
+        Double degrees = Double.valueOf(arrayLine[0]); 
+        char scale = arrayLine[1].charAt(0); 
+        scale = Character.toUpperCase(scale); 
+
+        if(tempCheck(degrees, scale)) {
+            setDegrees(degrees);
+            setScale(scale);
+        } else {
+            System.out.print("\nNew temperature failed.\n");
+        }
+    }
+    
+    
+    public void printTemp() {
+
+        System.out.print(Math.round(tempDegrees) + " " + tempScale); 
+    }
+
+    /*******************************ADJUSTMENT OPERATIONS**********************/
+    public Temperature raise(Temperature temp, double degrees) {
+        Temperature newTemp = new Temperature(temp.getDegrees() + degrees, temp.getScale());
+        return newTemp; 
+    }
+
+    public Temperature lower(Temperature temp, double degrees) {
+        Temperature newTemp = temp; 
+        
+        if(tempCheck(temp.getDegrees() - degrees, temp.getScale())) {
+            newTemp = new Temperature(temp.getDegrees() - degrees, temp.getScale());
+            return newTemp; 
+        } else {
+            System.out.print("Temperature is too low!"); 
+            return temp; 
+        }
+
+        
+
+    }
+
+    /*************************Relational Operations*****************************/
+    public boolean equals(Temperature temp1, Temperature temp2) {
+        
+        Temperature temp1F = temp1.toF(); 
+        Temperature temp2F = temp2.toF(); 
+
+        //Return true if they are equal. 
+        if(temp1F.getDegrees() == temp2F.getDegrees()) {
+            return true; 
+        } else {
+            return false; 
+        }
+
+    }//End of Function equals()
+
+    public boolean lessThan(Temperature leftSide, Temperature rightSide) {
+
+        leftSide = leftSide.toF(); 
+        leftSide = leftSide.toF(); 
+
+        //Return true if left < right. 
+        if(leftSide.getDegrees() <= rightSide.getDegrees()) {
+            return true; 
+        } else {
+            return false; 
+        }
+
+
+    }//End of Function lessThan()
+
+
+
+
+    /******************************
+     * tempCheck()
+     * In: var, var 
+     * Out: bool
+     * 
+     * Takes two variables,
+     * Checks that they are actual
+     * temps and of correct scale. 
+     ******************************/
+
+    public boolean tempCheck(Double degrees, char scale) {
+        
+        //Check Fahrenheit
+        if(scale == 'F' && degrees >= -459.67) {
+            return true;
+        }
+
+        //Check Celsius
+        else if(scale == 'C' && degrees >= -273.15) {
+            return true;
+        }
+
+        //Check Calvin
+        else if(scale == 'K' && degrees >= 0) {
+            return true; 
+        } 
+        
+        else {
+            return false;
+        } 
+
+    } //End of Function tempCheck()
+
+    //Class Variables
+    private Double tempDegrees; 
+    private char tempScale; 
+
+}//End of Class Temperature/* TempTester.java, Driver sed to test and run Temperature class.  
+ * This program takes three values, and uses Temperature class
+ * to create a table of values.  
+ * Tests:
+ *      - Input:  
+ *          - baseTemp
+ *          - limitTemp
+ *          - stepValue
+ *      -Output: 
+ *          - Formatted table
+ * 
+ * Author: Brian Goins (bmg23)
+ * Date: 4/5/2019
+ *****************************************************************/
+import java.util.Scanner; 
+
+
+ public class TempTester {
+    /**********************************************
+     *Main: 
+     * Calls table function while the user wants to 
+     * keep entering values.  
+     ***********************************************/ 
+    public static void main(String[] args) {  
+        
+        table();
+
+        table();    
+
+        
+     
+
+    }
+
+    /*********************************************
+     *table(), sub-program that takes input  
+     * from user and prints a formatted table. 
+     **********************************************/
+
+    public static void table() {
+        //Initialize values used in table.         
+        Temperature baseTemp = new Temperature(0.0, 'F'); 
+        Temperature limitTemp = new Temperature(0.0, 'F');
+        Temperature temp = new Temperature(0.0, 'F');
+        Double stepValue = 0.0; 
+        String line = ""; 
+
+        //Test functions not used in tester class.
+        assert baseTemp.equals(limitTemp); 
+        
+        baseTemp =  baseTemp.raise(baseTemp, stepValue); 
+        assert baseTemp.getDegrees() == 2.5; 
+        baseTemp = baseTemp.lower(baseTemp, stepValue);
+        assert baseTemp.getDegrees() == 2.5;
+
+       
+        //Get values from user.
+        Scanner keyboard = new Scanner(System.in); 
+        
+        System.out.print("\nEnter a Base Temperature: "); 
+        line = keyboard.nextLine();
+        baseTemp.readTemp(line);
+
+        System.out.print("\nEnter a Limit Temperature: ");
+        line = keyboard.nextLine();
+        limitTemp.readTemp(line);
+
+        System.out.print("\nEnter a Step Value: "); 
+        stepValue = keyboard.nextDouble(); 
+
+        
+        //Print Table
+        System.out.println("\n\n-----------------------------Temperature Table----------------------------------"); 
+        System.out.print("\n" + "Fahrenheit\t" + "\tCelsius\t\t" + "\tKelvin" + "\n"); 
+
+        while(baseTemp.lessThan(baseTemp, limitTemp)) {
+
+            //Print the temp in Fahrenheit. 
+            temp = baseTemp.toF();
+            temp.printTemp();
+
+            System.out.print("\t\t\t");
+
+            //Print the temp in Celsius. 
+            temp = baseTemp.toC();
+            temp.printTemp();
+
+            System.out.print("\t\t\t");
+
+            //Print the temp in Kelvin. 
+            temp = baseTemp.toK();
+            temp.printTemp();
+
+            System.out.print("\n");
+
+            baseTemp = baseTemp.raise(baseTemp, stepValue); 
+        }
+        
+
+    }
+
+ }bmg23@maroon30:~/214/projects/08/Java$ javac TempTester.java
+bmg23@maroon30:~/214/projects/08/Java$ java TempTester
+
+Enter a Base Temperature: 0 F
+
+Enter a Limit Temperature: 100 C
+
+Enter a Step Value: 2.5
+
+
+-----------------------------Temperature Table----------------------------------
+
+Fahrenheit		Celsius			Kelvin
+0 F			-18 C			255 K
+3 F			-16 C			257 K
+5 F			-15 C			258 K
+8 F			-14 C			260 K
+10 F			-12 C			261 K
+13 F			-11 C			262 K
+15 F			-9 C			264 K
+18 F			-8 C			265 K
+20 F			-7 C			266 K
+23 F			-5 C			268 K
+25 F			-4 C			269 K
+28 F			-2 C			271 K
+30 F			-1 C			272 K
+33 F			0 C			273 K
+35 F			2 C			275 K
+38 F			3 C			276 K
+40 F			4 C			278 K
+43 F			6 C			279 K
+45 F			7 C			280 K
+48 F			9 C			282 K
+50 F			10 C			283 K
+53 F			11 C			285 K
+55 F			13 C			286 K
+58 F			14 C			287 K
+60 F			16 C			289 K
+63 F			17 C			290 K
+65 F			18 C			291 K
+68 F			20 C			293 K
+70 F			21 C			294 K
+73 F			23 C			296 K
+75 F			24 C			297 K
+78 F			25 C			298 K
+80 F			27 C			300 K
+83 F			28 C			301 K
+85 F			29 C			303 K
+88 F			31 C			304 K
+90 F			32 C			305 K
+93 F			34 C			307 K
+95 F			35 C			308 K
+98 F			36 C			310 K
+100 F			38 C			311 K
+
+Enter a Base Temperature: 0 K
+
+Enter a Limit Temperature: 212 F
+
+Enter a Step Value: 20.0
+
+
+-----------------------------Temperature Table----------------------------------
+
+Fahrenheit		Celsius			Kelvin
+-460 F			-273 C			0 K
+-424 F			-253 C			20 K
+-388 F			-233 C			40 K
+-352 F			-213 C			60 K
+-316 F			-193 C			80 K
+-280 F			-173 C			100 K
+-244 F			-153 C			120 K
+-208 F			-133 C			140 K
+-172 F			-113 C			160 K
+-136 F			-93 C			180 K
+-100 F			-73 C			200 K
+-64 F			-53 C			220 K
+-28 F			-33 C			240 K
+8 F			-13 C			260 K
+44 F			7 C			280 K
+80 F			27 C			300 K
+116 F			47 C			320 K
+152 F			67 C			340 K
+188 F			87 C			360 K
+bmg23@maroon30:~/214/projects/08/Java$ exit
+
+Script done on Sat 13 Apr 2019 07:18:08 PM EDT
+Script started on Sat 13 Apr 2019 07:21:59 PM EDT
+bmg23@maroon30:~/214/projects/08$ c[Kc [Kd ru[K[KRuby
+bmg23@maroon30:~/214/projects/08/Ruby$ cat *.rb
+# Temperature.java, this class stores a 
+# Degrees and Scale of a Temperature. 
+#  
+# Temp class: 
+#      - Stores degrees and scale
+#      - Accessors 
+#      - Conversion Functions
+#      - Relation Operations 
+# 
+# 
+# Author: Brian Goins (bmg23)
+# Date: 4/4/2019 
+##########################################
+
+class Temperature
+    
+    ###########################################################
+    #                      INITIALIZATION                     #
+    ###########################################################
+
+    def initialize(degrees, scale)
+        if tempCheck(degrees, scale)    
+            @degrees = degrees
+            @scale = scale
+        end
+    end
+
+    ## GETTERS ##
+    attr_reader :degrees, :scale
+    ## SETTERS ##
+    attr_accessor :degrees, :scale
+
+    ###########################################################
+    #                       CONVERTER                         #
+    ###########################################################
+
+    ## FAHRENHEIT ##
+    def toF()
+        if scale == "C"
+            newDegrees = (@degrees*1.8) + 32
+            return Temperature.new(newDegrees, "F")
+        elsif scale == "K"
+            newDegrees = ((@degrees - 273.15) * 1.8) + 32
+            return Temperature.new(newDegrees, "F")
+        else 
+            return Temperature.new(@degrees, @scale)
+        end
+    end
+
+    ## CELSIUS ##
+    def toC()
+        if scale == "F"
+            newDegrees = (@degrees - 32) * 5/9
+            return Temperature.new(newDegrees, "C")
+        elsif scale == "K"
+            newDegrees = @degrees - 273.15
+            return Temperature.new(newDegrees, "C")
+        else 
+            return Temperature.new(@degrees, @scale)
+        end
+    end
+
+    ## KELVIN ##
+    def toK()
+        if scale == "F"
+            newDegrees = ((@degrees - 32) * 5/9) + 273.15
+            return Temperature.new(newDegrees, "K")
+        elsif scale == "C"
+            newDegrees = @degrees + 273.15
+            return Temperature.new(newDegrees, "K")
+        else 
+            return Temperature.new(@degrees, @scale)
+        end
+    end
+
+    ###########################################################
+    #                      I/O OPERATIONS                     #
+    ###########################################################
+
+    ## Read Temperature ##
+    def readTemp()
+        puts "Enter Temperature: "
+        line = gets.chomp
+        lineArray = line.split(" ")
+
+        @degrees = lineArray[0].to_f
+        @scale = lineArray[1]
+
+        return Temperature.new(degrees, scale)
+
+    end
+
+    ## Print Temperature ##
+    def printTemp()
+        print @degrees.round
+        print " "
+        print @scale
+    end
+
+    ###########################################################
+    #                  ADJUSTMENT OPERATIONS                  #
+    ###########################################################
+
+    ## Raise ##
+    def raise(stepValue)
+        @degrees += stepValue
+    end
+
+    ## Lower ##
+    def lower(stepValue)
+        newDegrees = degrees - stepValue
+        if tempCheck(newDegrees, scale)
+            @degrees -= stepValue
+        end
+    end
+
+    ###########################################################
+    #                  RELATONAL OPERATIONS                   #
+    ###########################################################
+
+    ## Equals ##
+    def equals(temp1, temp2) 
+        if temp1.toF.degrees == temp2.toF.degrees
+            return true
+        else
+            return false
+        end
+    end 
+
+    ## Less Than ##
+    def lessThan(leftSide, rightSide)
+        lsF = leftSide.toF()
+        rsF = rightSide.toF()
+
+        if lsF.degrees <= rsF.degrees
+           return true
+        else 
+            return false
+        end
+    end
+
+    ###########################################################
+    #                     CHECK TEMP                          #
+    ###########################################################
+    # tempCheck()                                             #
+    # In: var, var                                            #
+    # Out: bool                                               #
+    #                                                         #
+    # Takes two variables,                                    #
+    # Checks that they are actual                             #
+    # temps and of correct scale.                             #
+    ###########################################################
+
+    def tempCheck(degrees, scale)
+        if scale == "F" and degrees >= -459.67
+            return true
+        elsif scale == "C" and degrees >= -273.15
+            return true
+        elsif scale == "K" and degrees >= 0
+            return true
+        else
+            return false
+        end 
+    end
+
+
+end 
+        # TempTester.java, Driver sed to test and run Temperature class.  
+# This program takes three values, and uses Temperature class
+# to create a table of values.  
+# Tests:
+#      - Input:  
+#          - baseTemp
+#          - limitTemp
+#          - stepValue
+#      -Output: 
+#          - Formatted table
+# 
+# Author: Brian Goins (bmg23)
+# Date: 4/5/2019
+#################################################################
+
+
+require_relative "Temperature"
+
+def testTemp
+    temp = Temperature.new(0.0, "F")
+    baseTemp = Temperature.new(0.0, "F")
+    limitTemp = Temperature.new(0.0, "F")
+    stepValue = 0.0
+
+    baseTemp = baseTemp.readTemp()
+    limitTemp = limitTemp.readTemp()
+
+    puts "Enter a stepValue: "
+    stepValue = gets.chomp.to_f
+
+    puts "\n\n-----------------------------Temperature Table----------------------------------"
+    puts "\nFahrenheit\t\tCelsius\t\t\tKelvin\n"
+
+    while temp.lessThan(baseTemp, limitTemp)
+        #Fahrenheit 
+        temp = baseTemp.toF()
+        temp.printTemp()
+
+        print "\t\t\t"
+        
+        #Celsius
+        temp = baseTemp.toC()
+        temp.printTemp()
+
+        print "\t\t\t"
+
+        #Kelvin
+        temp = baseTemp.toK()
+        temp.printTemp()
+
+        print "\n"
+
+        baseTemp.raise(stepValue)
+    end 
+
+
+end 
+
+testTemp
+testTempbmg23@maroon30:~/214/projects/08/Ruby$ ruby TempTester.rb
+Enter Temperature: 
+0 F
+Enter Temperature: 
+100 C
+Enter a stepValue: 
+2.5
+
+
+-----------------------------Temperature Table----------------------------------
+
+Fahrenheit		Celsius			Kelvin
+0 F			-18 C			255 K
+3 F			-16 C			257 K
+5 F			-15 C			258 K
+8 F			-14 C			260 K
+10 F			-12 C			261 K
+13 F			-11 C			262 K
+15 F			-9 C			264 K
+18 F			-8 C			265 K
+20 F			-7 C			266 K
+23 F			-5 C			268 K
+25 F			-4 C			269 K
+28 F			-3 C			271 K
+30 F			-1 C			272 K
+33 F			0 C			273 K
+35 F			2 C			275 K
+38 F			3 C			276 K
+40 F			4 C			278 K
+43 F			6 C			279 K
+45 F			7 C			280 K
+48 F			9 C			282 K
+50 F			10 C			283 K
+53 F			11 C			285 K
+55 F			13 C			286 K
+58 F			14 C			287 K
+60 F			16 C			289 K
+63 F			17 C			290 K
+65 F			18 C			291 K
+68 F			20 C			293 K
+70 F			21 C			294 K
+73 F			23 C			296 K
+75 F			24 C			297 K
+78 F			25 C			298 K
+80 F			27 C			300 K
+83 F			28 C			301 K
+85 F			29 C			303 K
+88 F			31 C			304 K
+90 F			32 C			305 K
+93 F			34 C			307 K
+95 F			35 C			308 K
+98 F			36 C			310 K
+100 F			38 C			311 K
+103 F			39 C			312 K
+105 F			41 C			314 K
+108 F			42 C			315 K
+110 F			43 C			316 K
+113 F			45 C			318 K
+115 F			46 C			319 K
+118 F			48 C			321 K
+120 F			49 C			322 K
+123 F			50 C			323 K
+125 F			52 C			325 K
+128 F			53 C			326 K
+130 F			54 C			328 K
+133 F			56 C			329 K
+135 F			57 C			330 K
+138 F			59 C			332 K
+140 F			60 C			333 K
+143 F			61 C			335 K
+145 F			63 C			336 K
+148 F			64 C			337 K
+150 F			66 C			339 K
+153 F			67 C			340 K
+155 F			68 C			341 K
+158 F			70 C			343 K
+160 F			71 C			344 K
+163 F			73 C			346 K
+165 F			74 C			347 K
+168 F			75 C			348 K
+170 F			77 C			350 K
+173 F			78 C			351 K
+175 F			79 C			353 K
+178 F			81 C			354 K
+180 F			82 C			355 K
+183 F			84 C			357 K
+185 F			85 C			358 K
+188 F			86 C			360 K
+190 F			88 C			361 K
+193 F			89 C			362 K
+195 F			91 C			364 K
+198 F			92 C			365 K
+200 F			93 C			366 K
+203 F			95 C			368 K
+205 F			96 C			369 K
+208 F			98 C			371 K
+210 F			99 C			372 K
+Enter Temperature: 
+0 K
+Enter Temperature: 
+212 F
+Enter a stepValue: 
+20.0
+
+
+-----------------------------Temperature Table----------------------------------
+
+Fahrenheit		Celsius			Kelvin
+-460 F			-273 C			0 K
+-424 F			-253 C			20 K
+-388 F			-233 C			40 K
+-352 F			-213 C			60 K
+-316 F			-193 C			80 K
+-280 F			-173 C			100 K
+-244 F			-153 C			120 K
+-208 F			-133 C			140 K
+-172 F			-113 C			160 K
+-136 F			-93 C			180 K
+-100 F			-73 C			200 K
+-64 F			-53 C			220 K
+-28 F			-33 C			240 K
+8 F			-13 C			260 K
+44 F			7 C			280 K
+80 F			27 C			300 K
+116 F			47 C			320 K
+152 F			67 C			340 K
+188 F			87 C			360 K
+bmg23@maroon30:~/214/projects/08/Ruby$ exit
+
+Script done on Sat 13 Apr 2019 07:23:10 PM EDT

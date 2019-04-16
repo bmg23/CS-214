@@ -1,0 +1,58 @@
+Script started on Tue 26 Feb 2019 08:12:31 PM EST
+bmg23@maroon34:~/214/projects/04$ cd clojure
+bmg23@maroon34:~/214/projects/04/clojure$ cd drc
+bash: cd: drc: No such file or directory
+bmg23@maroon34:~/214/projects/04/clojure$ cd src
+bmg23@maroon34:~/214/projects/04/clojure/src$ cat #[K*
+;; factorial.clj, takes an integer n and returns n!
+;;
+;; Author: Brian Goins
+;; Date 2/26/2019 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(ns factorial)
+
+(defn factorial [n]
+    (if (< n 2)
+        1
+        (* n (factorial (- n 1)))
+    )
+    
+)
+
+(defn -main[]
+    (print "Enter a number to get its factorial: ")
+    (flush)
+
+    (let
+        [n (double (read))] 
+        (printf "\nFactorial = %f" (factorial n))
+        
+    )
+    (print "\n\n") (flush)
+)
+
+bmg23@maroon34:~/214/projects/04/clojure/src$ cd .. 
+bmg23@maroon34:~/214/projects/04/clojure$ clojure -m factorial
+Enter a number to get its factorial: 2
+
+Factorial = 2.000000
+
+bmg23@maroon34:~/214/projects/04/clojure$ clojure -m factorial
+Enter a number to get its factorial: 3
+
+Factorial = 6.000000
+
+bmg23@maroon34:~/214/projects/04/clojure$ clojure -m factorial
+Enter a number to get its factorial: 7
+
+Factorial = 5040.000000
+
+bmg23@maroon34:~/214/projects/04/clojure$ clojure -m factorial
+Enter a number to get its factorial: 8
+
+Factorial = 40320.000000
+
+bmg23@maroon34:~/214/projects/04/clojure$ exit
+
+Script done on Tue 26 Feb 2019 08:13:10 PM EST
